@@ -1,6 +1,6 @@
 
 #define MyAppName "GeneratorTaloniv"
-#define MyAppVersion "1.0.1"
+#define MyAppVersion "1.0.0"
 #define MyAppPublisher "GeneratorTaloniv"
 #define MyAppExeName "GeneratorTaloniv.exe"
 
@@ -17,7 +17,7 @@ UninstallDisplayIcon={app}\{#MyAppExeName}
 
 PrivilegesRequired=lowest
 
-OutputDir=C:\Users\USER\Desktop\GeneratorTaloniv\dist
+OutputDir=dist
 OutputBaseFilename=GeneratorTaloniv_Setup
 
 Compression=lzma
@@ -34,7 +34,7 @@ Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 Name: "desktopicon"; Description: "Створити ярлик на робочому столі"; GroupDescription: "Додаткові параметри:"
 
 [Files]
-Source: "C:\Users\USER\Desktop\GeneratorTaloniv\dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
