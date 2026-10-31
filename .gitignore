@@ -1,0 +1,22 @@
+# Тимчасові файли Python
+__pycache__/
+*.py[cod]
+
+# Результати компіляції
+build/
+dist/
+_internal/
+*.exe
+
+# Особисті дані програми
+history.json
+settings.json
+ticket_counter.txt
+
+# Створені талони та QR-коди
+PDF/
+QR-коди/
+
+# Системні файли
+.DS_Store
+Thumbs.db
