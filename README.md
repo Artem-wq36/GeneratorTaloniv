@@ -110,6 +110,8 @@ C:\Users\Ім'я_користувача\AppData\Local\GeneratorTaloniv
 
 ---
 
+### v1.0.1
+
 **03.11.2026 — Оновлення програми GeneratorTaloniv.exe до версії v1.0.1**
 
 Оновлення програми GeneratorTaloniv із повністю переробленим дизайном інтерфейсу.
