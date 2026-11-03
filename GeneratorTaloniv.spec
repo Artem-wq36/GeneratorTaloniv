@@ -1,4 +1,3 @@
-
 # -*- mode: python ; coding: utf-8 -*-
 
 a = Analysis(
@@ -6,7 +5,9 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[],
-    hiddenimports=[],
+    hiddenimports=[
+        'customtkinter',
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -27,7 +28,7 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    upx=False,
     upx_exclude=[],
     runtime_tmpdir=None,
     console=False,
