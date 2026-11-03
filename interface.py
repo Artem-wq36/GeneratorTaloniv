@@ -1,131 +1,278 @@
-
 import shutil
 import tkinter as tk
+import customtkinter as ctk
 
 from datetime import datetime
 from pathlib import Path
-from tkinter import ttk, filedialog, messagebox
+from tkinter import filedialog, messagebox
 
-from settings import (
-    LOGOS_DIR,
-    load_settings,
-    save_settings
-)
-
-from history import (
-    get_next_number,
-    load_history,
-    save_ticket
-)
-
+from settings import LOGOS_DIR, load_settings, save_settings
+from history import get_next_number, load_history, save_ticket
 from pdf_generator import generate_pdf
+
+
+ctk.set_appearance_mode("dark")
+ctk.set_default_color_theme("blue")
 
 
 class GeneratorApp:
 
+    BG = "#111827"
+    CARD = "#1F2937"
+    INPUT = "#111827"
+    BORDER = "#374151"
+    TEXT = "#F9FAFB"
+    MUTED = "#9CA3AF"
+    BLUE = "#2563EB"
+    BLUE_HOVER = "#1D4ED8"
+    GREEN = "#22C55E"
+
     def __init__(self, root):
         self.root = root
-        self.root.title("Генератор електронних талонів")
-        self.root.geometry("600x520")
-        self.root.minsize(520, 480)
+        self.root.title("GeneratorTaloniv")
+        self.root.geometry("900x760")
+        self.root.minsize(760, 680)
+        self.root.configure(fg_color=self.BG)
 
         self.settings = load_settings()
 
         self.create_interface()
 
     def create_interface(self):
-        main_frame = ttk.Frame(self.root, padding=20)
-        main_frame.pack(fill="both", expand=True)
-
-        title = ttk.Label(
-            main_frame,
-            text="ГЕНЕРАТОР ЕЛЕКТРОННИХ ТАЛОНІВ",
-            font=("Arial", 15, "bold")
+        main = ctk.CTkFrame(
+            self.root,
+            fg_color=self.BG,
+            corner_radius=0
         )
-        title.pack(pady=(0, 20))
+        main.pack(fill="both", expand=True, padx=35, pady=25)
 
-        form_frame = ttk.Frame(main_frame)
-        form_frame.pack(fill="x")
+        header = ctk.CTkFrame(
+            main,
+            fg_color="transparent"
+        )
+        header.pack(fill="x", pady=(0, 25))
+
+        title_frame = ctk.CTkFrame(
+            header,
+            fg_color="transparent"
+        )
+        title_frame.pack(side="left")
+
+        ctk.CTkLabel(
+            title_frame,
+            text="GeneratorTaloniv",
+            font=("Arial", 28, "bold"),
+            text_color=self.TEXT
+        ).pack(anchor="w")
+
+        ctk.CTkLabel(
+            title_frame,
+            text="Генератор електронних талонів",
+            font=("Arial", 13),
+            text_color=self.MUTED
+        ).pack(anchor="w", pady=(3, 0))
+
+        form_card = ctk.CTkFrame(
+            main,
+            fg_color=self.CARD,
+            corner_radius=16,
+            border_width=1,
+            border_color=self.BORDER
+        )
+        form_card.pack(fill="x", pady=(0, 20))
+
+        ctk.CTkLabel(
+            form_card,
+            text="Створення нового талона",
+            font=("Arial", 19, "bold"),
+            text_color=self.TEXT
+        ).pack(anchor="w", padx=25, pady=(22, 18))
+
+        fields_frame = ctk.CTkFrame(
+            form_card,
+            fg_color="transparent"
+        )
+        fields_frame.pack(fill="x", padx=25, pady=(0, 22))
 
         self.vehicle_entry = self.add_field(
-            form_frame,
-            "Номер транспортного засобу:",
-            0
+            fields_frame,
+            "Номер транспортного засобу",
+            "Введіть номер транспортного засобу"
         )
 
         self.driver_entry = self.add_field(
-            form_frame,
-            "Ім'я водія:",
-            1
+            fields_frame,
+            "Ім'я водія",
+            "Введіть ім'я водія"
         )
 
         self.manager_entry = self.add_field(
-            form_frame,
-            "Контакт менеджера:",
-            2
+            fields_frame,
+            "Контакт менеджера",
+            "Введіть контакт менеджера"
         )
 
-        self.date_entry = self.add_field(
-            form_frame,
-            "Дата завантаження (ДД.ММ.РРРР):",
-            3
+        date_time_frame = ctk.CTkFrame(
+            fields_frame,
+            fg_color="transparent"
         )
+        date_time_frame.pack(fill="x", pady=(0, 12))
+        date_time_frame.grid_columnconfigure((0, 1), weight=1)
 
-        self.time_entry = self.add_field(
-            form_frame,
-            "Час завантаження (ГГ:ХХ):",
-            4
+        date_frame = ctk.CTkFrame(
+            date_time_frame,
+            fg_color="transparent"
         )
-
-        buttons_frame = ttk.Frame(main_frame)
-        buttons_frame.pack(fill="x", pady=25)
-
-        ttk.Button(
-            buttons_frame,
-            text="Згенерувати PDF",
-            command=self.create_ticket
-        ).pack(fill="x", pady=5)
-
-        ttk.Button(
-            buttons_frame,
-            text="Переглянути історію",
-            command=self.show_history
-        ).pack(fill="x", pady=5)
-
-        ttk.Button(
-            buttons_frame,
-            text="Налаштування підприємства",
-            command=self.show_settings
-        ).pack(fill="x", pady=5)
-
-        self.status_label = ttk.Label(
-            main_frame,
-            text="Програма готова до роботи.",
-            foreground="green"
-        )
-        self.status_label.pack(pady=10)
-
-    def add_field(self, parent, label_text, row):
-        ttk.Label(
-            parent,
-            text=label_text
-        ).grid(
-            row=row,
+        date_frame.grid(
+            row=0,
             column=0,
-            sticky="w",
-            pady=7
+            sticky="ew",
+            padx=(0, 10)
         )
 
-        entry = ttk.Entry(parent, width=35)
-        entry.grid(
-            row=row,
+        ctk.CTkLabel(
+            date_frame,
+            text="Дата завантаження",
+            font=("Arial", 13, "bold"),
+            text_color=self.TEXT
+        ).pack(anchor="w", pady=(0, 7))
+
+        self.date_entry = ctk.CTkEntry(
+            date_frame,
+            height=42,
+            placeholder_text="ДД.ММ.РРРР",
+            fg_color=self.INPUT,
+            border_color=self.BORDER,
+            text_color=self.TEXT,
+            placeholder_text_color=self.MUTED,
+            corner_radius=9
+        )
+        self.date_entry.pack(fill="x")
+
+        time_frame = ctk.CTkFrame(
+            date_time_frame,
+            fg_color="transparent"
+        )
+        time_frame.grid(
+            row=0,
             column=1,
             sticky="ew",
-            padx=(10, 0),
-            pady=7
+            padx=(10, 0)
         )
 
-        parent.columnconfigure(1, weight=1)
+        ctk.CTkLabel(
+            time_frame,
+            text="Час завантаження",
+            font=("Arial", 13, "bold"),
+            text_color=self.TEXT
+        ).pack(anchor="w", pady=(0, 7))
+
+        self.time_entry = ctk.CTkEntry(
+            time_frame,
+            height=42,
+            placeholder_text="ГГ:ХХ",
+            fg_color=self.INPUT,
+            border_color=self.BORDER,
+            text_color=self.TEXT,
+            placeholder_text_color=self.MUTED,
+            corner_radius=9
+        )
+        self.time_entry.pack(fill="x")
+
+        ctk.CTkButton(
+            form_card,
+            text="Створити талон  →",
+            height=48,
+            font=("Arial", 15, "bold"),
+            fg_color=self.BLUE,
+            hover_color=self.BLUE_HOVER,
+            corner_radius=10,
+            command=self.create_ticket
+        ).pack(fill="x", padx=25, pady=(0, 25))
+
+        actions_frame = ctk.CTkFrame(
+            main,
+            fg_color="transparent"
+        )
+        actions_frame.pack(fill="x")
+
+        actions_frame.grid_columnconfigure((0, 1), weight=1)
+
+        ctk.CTkButton(
+            actions_frame,
+            text="📋  Переглянути історію",
+            height=48,
+            font=("Arial", 14, "bold"),
+            fg_color=self.CARD,
+            hover_color=self.BORDER,
+            border_width=1,
+            border_color=self.BORDER,
+            corner_radius=10,
+            command=self.show_history
+        ).grid(
+            row=0,
+            column=0,
+            sticky="ew",
+            padx=(0, 7)
+        )
+
+        ctk.CTkButton(
+            actions_frame,
+            text="⚙  Налаштування підприємства",
+            height=48,
+            font=("Arial", 14, "bold"),
+            fg_color=self.CARD,
+            hover_color=self.BORDER,
+            border_width=1,
+            border_color=self.BORDER,
+            corner_radius=10,
+            command=self.show_settings
+        ).grid(
+            row=0,
+            column=1,
+            sticky="ew",
+            padx=(7, 0)
+        )
+
+        status_frame = ctk.CTkFrame(
+            main,
+            fg_color="transparent"
+        )
+        status_frame.pack(side="bottom", fill="x", pady=(25, 0))
+
+        self.status_label = ctk.CTkLabel(
+            status_frame,
+            text="●  Програма готова до роботи",
+            font=("Arial", 12),
+            text_color=self.GREEN
+        )
+        self.status_label.pack(anchor="center")
+
+    def add_field(self, parent, label_text, placeholder):
+        field_frame = ctk.CTkFrame(
+            parent,
+            fg_color="transparent"
+        )
+        field_frame.pack(fill="x", pady=(0, 12))
+
+        ctk.CTkLabel(
+            field_frame,
+            text=label_text,
+            font=("Arial", 13, "bold"),
+            text_color=self.TEXT
+        ).pack(anchor="w", pady=(0, 7))
+
+        entry = ctk.CTkEntry(
+            field_frame,
+            height=42,
+            placeholder_text=placeholder,
+            fg_color=self.INPUT,
+            border_color=self.BORDER,
+            text_color=self.TEXT,
+            placeholder_text_color=self.MUTED,
+            corner_radius=9
+        )
+        entry.pack(fill="x")
 
         return entry
 
@@ -184,7 +331,6 @@ class GeneratorApp:
             return
 
         selected_folder = Path(selected_folder)
-
         self.settings["last_save_folder"] = str(selected_folder)
 
         try:
@@ -259,9 +405,9 @@ class GeneratorApp:
             )
             return
 
-        self.status_label.config(
-            text=f"Талон № {number:06d} успішно створено.",
-            foreground="green"
+        self.status_label.configure(
+            text=f"●  Талон № {number:06d} успішно створено",
+            text_color=self.GREEN
         )
 
         messagebox.showinfo(
@@ -274,25 +420,30 @@ class GeneratorApp:
     def show_history(self):
         history = load_history()
 
-        window = tk.Toplevel(self.root)
+        window = ctk.CTkToplevel(self.root)
         window.title("Історія талонів")
-        window.geometry("750x500")
+        window.geometry("800x600")
+        window.minsize(600, 400)
+        window.configure(fg_color=self.BG)
 
-        frame = ttk.Frame(window, padding=10)
-        frame.pack(fill="both", expand=True)
+        ctk.CTkLabel(
+            window,
+            text="Історія талонів",
+            font=("Arial", 23, "bold"),
+            text_color=self.TEXT
+        ).pack(anchor="w", padx=25, pady=(25, 15))
 
-        scrollbar = ttk.Scrollbar(frame)
-        scrollbar.pack(side="right", fill="y")
-
-        text = tk.Text(
-            frame,
-            wrap="word",
-            font=("Arial", 10),
-            yscrollcommand=scrollbar.set
+        text = ctk.CTkTextbox(
+            window,
+            font=("Arial", 13),
+            fg_color=self.CARD,
+            text_color=self.TEXT,
+            border_width=1,
+            border_color=self.BORDER,
+            corner_radius=12,
+            wrap="word"
         )
-
-        text.pack(fill="both", expand=True)
-        scrollbar.config(command=text.yview)
+        text.pack(fill="both", expand=True, padx=25, pady=(0, 25))
 
         if not history:
             text.insert("end", "Історія талонів поки порожня.")
@@ -321,121 +472,134 @@ class GeneratorApp:
                     f"Створено: {ticket.get('creation_time', '')}\n"
                     f"PDF: {ticket.get('pdf_path', '')}\n"
                     f"QR-код: {ticket.get('qr_path', '')}\n"
-                    f"{'-' * 55}\n\n"
+                    f"{'-' * 65}\n\n"
                 )
 
-        text.config(state="disabled")
+        text.configure(state="disabled")
 
     def show_settings(self):
-        window = tk.Toplevel(self.root)
+        window = ctk.CTkToplevel(self.root)
         window.title("Налаштування підприємства")
-        window.geometry("550x390")
-        window.resizable(False, False)
+        window.geometry("700x650")
+        window.minsize(580, 500)
+        window.configure(fg_color=self.BG)
+        window.transient(self.root)
+        window.grab_set()
 
-        frame = ttk.Frame(window, padding=20)
-        frame.pack(fill="both", expand=True)
+        ctk.CTkLabel(
+            window,
+            text="Налаштування підприємства",
+            font=("Arial", 22, "bold"),
+            text_color=self.TEXT
+        ).pack(anchor="w", padx=25, pady=(22, 15))
+
+        frame = ctk.CTkFrame(
+            window,
+            fg_color=self.CARD,
+            corner_radius=14,
+            border_width=1,
+            border_color=self.BORDER
+        )
+        frame.pack(fill="both", expand=True, padx=25, pady=(0, 15))
+
+        content = ctk.CTkScrollableFrame(
+            frame,
+            fg_color="transparent",
+            corner_radius=0
+        )
+        content.pack(fill="both", expand=True, padx=5, pady=(5, 0))
+
+        fields = [
+            ("company_name", "Назва підприємства"),
+            ("company_address", "Адреса підприємства"),
+            ("location", "Місце завантаження / координати"),
+            ("footer_text", "Текст унизу талона")
+        ]
 
         entries = {}
 
-        fields = [
-            ("company_name", "Назва підприємства:"),
-            ("company_address", "Адреса підприємства:"),
-            ("location", "Місце завантаження / координати:"),
-            ("footer_text", "Текст унизу талона:")
-        ]
+        for key, label_text in fields:
+            ctk.CTkLabel(
+                content,
+                text=label_text,
+                font=("Arial", 13, "bold"),
+                text_color=self.TEXT
+            ).pack(anchor="w", padx=15, pady=(12, 5))
 
-        for row, (key, label_text) in enumerate(fields):
-            ttk.Label(
-                frame,
-                text=label_text
-            ).grid(
-                row=row,
-                column=0,
-                sticky="w",
-                pady=8
+            entry = ctk.CTkEntry(
+                content,
+                height=40,
+                fg_color=self.INPUT,
+                border_color=self.BORDER,
+                text_color=self.TEXT,
+                corner_radius=8
             )
-
-            entry = ttk.Entry(frame, width=42)
-            entry.grid(
-                row=row,
-                column=1,
-                sticky="ew",
-                padx=(10, 0),
-                pady=8
-            )
-
+            entry.pack(fill="x", padx=15)
             entry.insert(0, self.settings.get(key, ""))
             entries[key] = entry
 
+        current_logo = self.settings.get("logo_file", "")
         logo_var = tk.StringVar(
-            value=Path(self.settings.get("logo_file", "")).name
-            if self.settings.get("logo_file", "")
-            else ""
+            value=Path(current_logo).name if current_logo else ""
         )
 
-        ttk.Label(
-            frame,
-            text="Логотип:"
-        ).grid(
-            row=4,
-            column=0,
-            sticky="w",
-            pady=8
-        )
+        ctk.CTkLabel(
+            content,
+            text="Логотип підприємства",
+            font=("Arial", 13, "bold"),
+            text_color=self.TEXT
+        ).pack(anchor="w", padx=15, pady=(18, 5))
 
-        logo_label = ttk.Label(
-            frame,
+        logo_label = ctk.CTkLabel(
+            content,
             text=logo_var.get() or "Не вибрано",
-            width=30
+            text_color=self.MUTED
         )
-
-        logo_label.grid(
-            row=4,
-            column=1,
-            sticky="w",
-            padx=(10, 0)
-        )
+        logo_label.pack(anchor="w", padx=15, pady=(0, 8))
 
         selected_logo = {"path": None}
         clear_logo = {"value": False}
 
         def choose_logo():
             path = filedialog.askopenfilename(
+                parent=window,
                 title="Вибрати логотип",
-                filetypes=[
-                    ("Зображення", "*.png *.jpg *.jpeg")
-                ]
+                filetypes=[("Зображення", "*.png *.jpg *.jpeg")]
             )
 
             if path:
                 selected_logo["path"] = path
                 clear_logo["value"] = False
                 logo_var.set(Path(path).name)
-                logo_label.config(text=Path(path).name)
+                logo_label.configure(text=Path(path).name)
 
         def remove_logo():
             selected_logo["path"] = None
             clear_logo["value"] = True
             logo_var.set("")
-            logo_label.config(text="Не вибрано")
+            logo_label.configure(text="Не вибрано")
 
-        logo_buttons = ttk.Frame(frame)
-        logo_buttons.grid(
-            row=5,
-            column=1,
-            sticky="w",
-            padx=(10, 0)
+        logo_buttons = ctk.CTkFrame(
+            content,
+            fg_color="transparent"
         )
+        logo_buttons.pack(anchor="w", padx=15, pady=(0, 15))
 
-        ttk.Button(
+        ctk.CTkButton(
             logo_buttons,
             text="Вибрати",
+            width=110,
+            height=35,
             command=choose_logo
-        ).pack(side="left", padx=(0, 5))
+        ).pack(side="left", padx=(0, 8))
 
-        ttk.Button(
+        ctk.CTkButton(
             logo_buttons,
             text="Прибрати",
+            width=110,
+            height=35,
+            fg_color="#374151",
+            hover_color="#4B5563",
             command=remove_logo
         ).pack(side="left")
 
@@ -492,7 +656,7 @@ class GeneratorApp:
                 save_settings(new_settings)
                 self.settings = new_settings
 
-            except OSError as error:
+            except (OSError, TypeError, ValueError) as error:
                 messagebox.showerror(
                     "Помилка збереження",
                     str(error),
@@ -505,24 +669,21 @@ class GeneratorApp:
                 "Налаштування підприємства оновлено.",
                 parent=window
             )
-
             window.destroy()
 
-        ttk.Button(
+        ctk.CTkButton(
             frame,
             text="Зберегти налаштування",
+            height=46,
+            font=("Arial", 14, "bold"),
+            fg_color=self.BLUE,
+            hover_color=self.BLUE_HOVER,
+            corner_radius=10,
             command=save_changes
-        ).grid(
-            row=6,
-            column=0,
-            columnspan=2,
-            pady=25
-        )
-
-        frame.columnconfigure(1, weight=1)
+        ).pack(fill="x", padx=20, pady=15)
 
 
 def run_app():
-    root = tk.Tk()
+    root = ctk.CTk()
     GeneratorApp(root)
     root.mainloop()
