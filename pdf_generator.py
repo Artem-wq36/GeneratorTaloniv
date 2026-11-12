@@ -21,8 +21,6 @@ from reportlab.platypus import (
     Image
 )
 
-from settings import LOGOS_DIR
-
 
 def register_fonts():
     if "AppFont" in pdfmetrics.getRegisteredFontNames():
@@ -154,7 +152,7 @@ def generate_pdf(data, settings, number, output_path, qr_path):
 
     story.append(
         Paragraph(
-            f"ЕЛЕКТРОННИЙ ТАЛОН № {number:06d}",
+            f"Електронний талон на завантаження №{number:08d}",
             title_style
         )
     )
@@ -168,11 +166,11 @@ def generate_pdf(data, settings, number, output_path, qr_path):
             Paragraph("Параметр", header_style),
             Paragraph("Інформація", header_style)
         ],
-        ["Номер автомобіля", data["vehicle"]],
-        ["Водій", data["driver"]],
-        ["Контакт менеджера", data["manager"]],
         ["Дата завантаження", data["loading_date"]],
         ["Час завантаження", data["loading_time"]],
+        ["Номер транспортного засобу", data["vehicle"]],
+        ["Ім'я водія", data["driver"]],
+        ["Контакт менеджера", data["manager"]],
         ["Місце завантаження", settings["location"]],
         ["Дата створення талона", creation_time]
     ]
@@ -207,6 +205,13 @@ def generate_pdf(data, settings, number, output_path, qr_path):
                 "FONTNAME",
                 (0, 0),
                 (-1, 0),
+                "AppFont-Bold"
+            ),
+            # Перші два параметри виділені жирним шрифтом.
+            (
+                "FONTNAME",
+                (0, 1),
+                (-1, 2),
                 "AppFont-Bold"
             ),
             (
@@ -264,33 +269,14 @@ def generate_pdf(data, settings, number, output_path, qr_path):
     story.append(table)
     story.append(Spacer(1, 10 * mm))
 
-    logo_file = settings.get("logo_file", "")
-
-    if logo_file:
-        logo_path = Path(logo_file)
-
-        if not logo_path.is_absolute():
-            logo_path = LOGOS_DIR / logo_path
-
-        if logo_path.exists():
-            logo = Image(
-                str(logo_path),
-                width=35 * mm,
-                height=22 * mm,
-                kind="proportional"
-            )
-
-            story.append(logo)
-            story.append(Spacer(1, 5 * mm))
-
-    qr = Image(
-        str(qr_path),
-        width=35 * mm,
-        height=35 * mm
+    story.append(
+        Paragraph(
+            settings["footer_text"],
+            normal_style
+        )
     )
 
-    story.append(qr)
-    story.append(Spacer(1, 4 * mm))
+    story.append(Spacer(1, 5 * mm))
 
     story.append(
         Paragraph(
@@ -299,13 +285,14 @@ def generate_pdf(data, settings, number, output_path, qr_path):
         )
     )
 
-    story.append(Spacer(1, 8 * mm))
+    story.append(Spacer(1, 3 * mm))
 
-    story.append(
-        Paragraph(
-            settings["footer_text"],
-            normal_style
-        )
+    qr = Image(
+        str(qr_path),
+        width=35 * mm,
+        height=35 * mm
     )
+
+    story.append(qr)
 
     document.build(story)

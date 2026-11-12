@@ -4,7 +4,9 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[
+        ('app_icon.ico', '.'),
+    ],
     hiddenimports=[
         'customtkinter',
     ],
@@ -25,6 +27,7 @@ exe = EXE(
     a.datas,
     [],
     name='GeneratorTaloniv',
+    icon='app_icon.ico',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

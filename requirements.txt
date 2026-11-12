@@ -1,4 +1,5 @@
 reportlab
 qrcode[pil]
-customtkinter
 pyinstaller
+customtkinter
+Send2Trash
