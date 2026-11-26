@@ -572,7 +572,11 @@ class GeneratorApp:
             return
 
         try:
-            datetime.strptime(loading_time, "%H:%M")
+            parsed_time = datetime.strptime(loading_time, "%H:%M")
+
+            if loading_time != parsed_time.strftime("%H:%M"):
+                raise ValueError
+
         except ValueError:
             messagebox.showerror(
                 "Помилка часу",
